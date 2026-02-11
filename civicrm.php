@@ -1676,6 +1676,10 @@ class CiviCRM_For_WordPress {
       return $showAdminNav;
     }
 
+    if (!get_option('civicrm_suppress_menu_single_page', TRUE)) {
+      return $showAdminNav;
+    }
+
     $scopes = explode(' ',
       CRM_Core_Session::singleton()->get('authx')['jwt']['scope'] ?? ''
     );

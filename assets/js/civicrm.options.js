@@ -175,6 +175,7 @@
       me.shortcode_select = $('#shortcode_mode');
       me.theme_select = $('#theme_compatibility_mode');
       me.email_select = $('#sync_email');
+      // FIXME: Imitate the sync_email, but apply to menusinglepage
       me.permissions_select = $('#permissions_role');
       me.auto_sign_in_user_select = $('#auto_sign_in_user');
       me.basepage_selected = me.basepage_select.val();

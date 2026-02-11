@@ -399,6 +399,16 @@ class CiviCRM_For_WordPress_Admin_Page_Options {
       $data
     );
 
+    add_meta_box(
+      'civicrm_suppress_menu_singlepage',
+      __('Suppress Menu for Single Page Tokens', 'civicrm'),
+      [$this, 'meta_box_options_menusinglepage_render'],
+      $screen_id,
+      'normal',
+      'core',
+      $data
+    );
+
   }
 
   // ---------------------------------------------------------------------------
@@ -581,6 +591,49 @@ class CiviCRM_For_WordPress_Admin_Page_Options {
 
     // Include template file.
     include CIVICRM_PLUGIN_DIR . 'assets/templates/metaboxes/metabox.options.theme.php';
+
+  }
+
+  /**
+   * @param $unused
+   * @param $metabox
+   * @since 6.12
+   */
+  public function meta_box_options_menusinglepage_render($unused, $metabox) {
+    if (!$this->civi->initialize()) {
+      return;
+    }
+
+    // Get the setting.
+    $email_sync_select = get_option('civicrm_suppress_menu_single_page', TRUE);
+
+    // Set selected attributes.
+    $selected_yes = $email_sync_select ? 'selected="selected"' : '';
+    $selected_no = $email_sync_select ? '' : 'selected="selected"';
+
+    // Set AJAX submit button options.
+    $options_ajax = [
+      'style' => 'float: right;',
+      'data-security' => esc_attr(wp_create_nonce('civicrm_menusinglepage')),
+      'disabled' => NULL,
+    ];
+
+    // Set POST submit button options.
+    $options_post = [
+      'style' => 'float: right;',
+    ];
+
+    /**
+     * Filters the MenuSinglePage submit button attributes.
+     *
+     * @since 6.12
+     *
+     * @param array $options_post The existing button attributes.
+     */
+    $options_post = apply_filters('civicrm/metabox/menusinglepage/submit/options', $options_post);
+
+    // Include template file.
+    include CIVICRM_PLUGIN_DIR . 'assets/templates/metaboxes/metabox.options.menusinglepage.php';
 
   }
 
@@ -845,6 +898,12 @@ class CiviCRM_For_WordPress_Admin_Page_Options {
       $this->form_save_email_sync();
       $this->form_redirect();
     }
+    elseif (!empty($_POST['civicrm_menusinglepage_post_submit'])) {
+      // Suppress Menu for Single Page Token.
+      $this->form_nonce_check();
+      $this->form_save_();
+      $this->form_redirect();
+    }
     elseif (!empty($_POST['civicrm_permissions_submit'])) {
       // Refresh permissions.
       $this->form_nonce_check();
@@ -964,6 +1023,15 @@ class CiviCRM_For_WordPress_Admin_Page_Options {
       'syncCMSEmail' => $sync_email,
     ]);
 
+  }
+
+  /**
+   * Save the CiviCRM Email Sync Setting.
+   *
+   * @since 5.34
+   */
+  private function form_save_menusinglepage_sync() {
+    update_option('civicrm_suppress_menu_single_page', $_POST['menusinglepage'] === 'yes');
   }
 
   /**
